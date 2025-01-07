@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>天气查询 - 工具</title>
+    <link rel="stylesheet" href="../../styles/main.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-image: url('../files/weather.jpg');
+            background-size: cover;
+            background-position: center;
+            color: white;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            margin-top: 50px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .weather-container {
+            text-align: center;
+        }
+        .weather-input, .api-input {
+            padding: 12px;
+            font-size: 16px;
+            width: calc(50% - 20px);
+            margin-right: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            transition: border 0.3s;
+            margin-bottom: 20px;
+        }
+        .weather-input:focus, .api-input:focus {
+            border-color: #4CAF50;
+            outline: none;
+        }
+        .weather-button {
+            padding: 12px 25px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+        .weather-button:hover {
+            background-color: #45a049;
+        }
+        .weather-result {
+            margin-top: 20px;
+            font-size: 20px;
+            padding: 15px;
+            background: rgba(249, 249, 249, 0.8);
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: left;
+            display: none;
+            color: #333;
+        }
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="logo">
+            <img src="../../images/logo.jpg" alt="logo">
+            <span>虹芡·【15】不实物の群</span>
+        </div>
+        <div>
+            <a href="../../tools.html" class="nav-button">返回</a>
+        </div>
+    </nav>
+    <div class="container">
+        <h1>天气查询</h1>
+        <div class="weather-container">
+            <input type="text" class="api-input" id="apiKey" placeholder="联系@虹芡 或 输入心知天气 API 密钥" required>
+            <input type="text" class="weather-input" id="city" placeholder="输入城市名称" required>
+            <button class="weather-button" onclick="getWeather()">查询天气</button>
+        </div>
+        <div class="weather-result" id="weather-result"></div>
+    </div>
+    <footer>
+        <p>&copy; 2025 虹芡·【15】不实物の群 | <a href="https://space.bilibili.com/3546581192149863" target="_blank">虹芡</a></p>
+    </footer>
+
+    <script>
+        async function getWeather() {
+            let apiKey; // 定义 apiKey 变量
+            const apiKeyInput = document.getElementById('apiKey').value;
+
+            // 根据用户输入或默认密钥设置 apiKey
+            if (apiKeyInput === "虹芡") {
+                apiKey = "S7xrCdPAINPoxJSiv"; // 固定 API 密钥
+            } else {
+                apiKey = apiKeyInput; // 用户输入的 API 密钥
+            }
+
+            const city = document.getElementById('city').value;
+            const weatherResult = document.getElementById('weather-result');
+
+            // 确保 apiKey 和 city 都存在
+            if (apiKey && city) {
+                const apiUrl = `https://api.seniverse.com/v3/weather/now.json?key=${apiKey}&location=${city}&language=zh-Hans&unit=c`;
+
+                try {
+                    const response = await fetch(apiUrl);
+                    if (!response.ok) {
+                        throw new Error('获取天气数据失败');
+                    }
+                    const data = await response.json();
+                    if (data.results && data.results.length > 0) {
+                        const weatherInfo = data.results[0];
+                        const resultHtml = `
+                            <h2>${weatherInfo.location.name} 的天气</h2>
+                            <p>天气状况：<strong>${weatherInfo.now.text}</strong></p>
+                            <p>当前气温：<strong>${weatherInfo.now.temperature}°C</strong></p>
+                            <p>最后更新时间：<strong>${weatherInfo.last_update}</strong></p>
+                        `;
+                        weatherResult.innerHTML = resultHtml;
+                        weatherResult.style.display = 'block'; // 显示结果区域
+                    } else {
+                        weatherResult.innerHTML = '没有找到该城市的天气信息。';
+                        weatherResult.style.display = 'block';
+                    }
+                } catch (error) {
+                    weatherResult.innerHTML = error.message; // 显示错误消息
+                    weatherResult.style.display = 'block'; // 显示结果区域
+                }
+            } else {
+                weatherResult.innerHTML = '请输入 API 密钥和城市名称。';
+                weatherResult.style.display = 'block'; // 显示结果区域
+            }
+        }
+    </script>
+</body>
+</html>

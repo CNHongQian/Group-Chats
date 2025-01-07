@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>虹芡·【15】不实物の群 - 首页</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="icon" href="images/logo.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="images/logo.ico" type="image/x-icon">
+</head>
+<body>
+    <nav>
+        <div class="logo">
+            <img src="images/logo.jpg" alt="logo">
+            <span>虹芡·【15】不实物の群</span>
+        </div>
+        <div>
+            <a href="index.html" class="active">首页</a>  
+            <a href="article.html">文章</a>
+            <a href="album.html">相册</a>
+            <a href="story.html">小说</a>
+            <a href="xiaomo.html">小莫</a>
+            <a href="tools.html">工具</a>
+        </div>
+    </nav>
+    <div class="container">
+        <h1 class="rainbow-text">欢迎来到 虹芡·【15】不实物の群 的网站</h1>
+        <div class="article">
+            <p id="current-time"></p>
+        </div>
+        <div class="article">
+            <h2>关于群</h2>
+            <p>本群建于 2024.12.6 20:00</p>
+        </div>
+        <div class="article">
+            <h2>虹芡是最伟大的</h2>
+            <p>对.</p>
+        </div>
+        <div class="article">
+            <h2>小莫是最好的机器人</h2>
+            <p>也对...</p>
+        </div>
+        <div class="article">
+            <h2>没了</h2>
+            <p>不是老弟你还想要看啥(⊙_⊙)?</p>
+        </div>
+    </div>
+    <footer>
+        <p>&copy; 2025 虹芡·【15】不实物の群 | <a href="https://space.bilibili.com/3546581192149863" target="_blank" >虹芡</a></p>
+    </footer>
+    <script>
+        const establishmentDate = new Date('2024-12-06T20:00:00');
+        function updateTime() {
+            const currentTime = new Date();
+            const timeDiff = currentTime - establishmentDate;
+            const years = Math.floor(timeDiff / (1000 * 60 * 60 * 24 * 365));
+            const months = Math.floor((timeDiff % (1000 * 60 * 60 * 24 * 365)) / (1000 * 60 * 60 * 24 * 30));
+            const days = Math.floor((timeDiff % (1000 * 60 * 60 * 24 * 30)) / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
+            const currentYear = currentTime.getFullYear();
+            const currentMonth = (currentTime.getMonth() + 1).toString().padStart(2, '0');
+            const currentDay = currentTime.getDate().toString().padStart(2, '0');
+            const currentHour = currentTime.getHours().toString().padStart(2, '0');
+            const currentMinute = currentTime.getMinutes().toString().padStart(2, '0');
+            const currentSecond = currentTime.getSeconds().toString().padStart(2, '0');
+            const currentTimeString = `${currentYear}-${currentMonth}-${currentDay} ${currentHour}:${currentMinute}:${currentSecond}`;
+            const groupTimeString = `已经${years}年${months}月${days}天${hours}小时${minutes}分钟${seconds}秒了！`;
+            document.getElementById('current-time').innerHTML = `   
+                <div style="font-size: 48px; font-weight: bold; color: #0077ff;">${currentTimeString}</div>
+                <div>该网站于2025年1月7日上线,已经${Math.floor((currentTime - new Date('2024-01-07')) / (1000 * 60 * 60 * 24))}天了！</div>
+                <div style="color: #ffffff;"">·</div>
+                <div>【15】不实物の群于2024年12月6日20:00建立</div>
+                <div style="color: #ff8800;"">${groupTimeString}</div>
+            `;
+        }  
+        updateTime();
+        setInterval(updateTime, 1000);
+    </script>      
+</body>
+</html>
+
