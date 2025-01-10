@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>二维码生成器 - 工具</title>
+    <link rel="icon" href="../../images/logo.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="../../images/logo.ico" type="image/x-icon">
+    <link rel="stylesheet" href="../../styles/main.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-image: url('../../images/background.gif');
+            background-size: cover;
+            background-position: center;
+            color: white;
+        }
+        .Icontainer {
+            max-width: 1200px;
+            margin: auto;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            margin-top: 50px;
+            color: #333;
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .controls input, .controls select, .controls button {
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            transition: border 0.3s;
+            width: calc(30% - 20px);
+        }
+        .controls input[type="color"] {
+            width: 100px;
+            height: 60px;
+            padding: 0;
+        }
+        .controls input:focus, .controls select:focus {
+            border-color: #4CAF50;
+            outline: none;
+        }
+        .controls button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .controls button:hover {
+            background-color: #45a049;
+        }
+        .loading {
+            text-align: center;
+            margin-top: 20px;
+            display: none;
+        }
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4CAF50;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        canvas {
+            display: none;
+            margin: 20px auto;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: white;
+        }
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #777;
+        }
+    </style>    
+</head>
+<body>
+    <nav>
+        <div class="logo">
+            <img src="../../images/logo.jpg" alt="logo">
+            <span>虹芡·【15】不实物の群</span>
+        </div>
+        <div>
+            <a href="../../tools.html" class="nav-button">返回</a>
+        </div>
+    </nav>
+    <div class="container">
+        <h1>二维码生成器</h1>
+        <div class="Icontainer">
+            <div class="controls">
+                <p>输入内容:</p>
+                <input type="text" id="text-input" placeholder="在这里输入内容..." />
+            </div>
+            <div class="controls">
+                <p>二维码颜色:</p>
+                <input type="color" id="color-input" value="#000000" disabled />
+                <p>背景颜色:</p>
+                <input type="color" id="bg-color-input" value="#ffffff" disabled />
+            </div>
+            <div class="controls">
+                <p>二维码大小:</p>
+                <input type="range" id="size-input" min="100" max="500" value="200" step="10" disabled />
+                <p id="size-value">200</p>
+            </div>
+            <div class="controls">
+                <button id="download" disabled>下载二维码</button>
+                <button id="reset">恢复默认值</button>
+            </div>        
+            <div class="loading" id="loading">
+                <div class="loading-spinner"></div>
+                <p>正在生成二维码...</p>
+            </div>
+            <canvas id="canvas"></canvas>
+        </div>
+    </div>
+    <footer>
+        <p>&copy; 2025 虹芡·【15】不实物の群 | <a href="https://space.bilibili.com/3546581192149863" target="_blank">虹芡</a></p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
+    <script>
+        const textInput = document.getElementById('text-input');
+        const colorInput = document.getElementById('color-input');
+        const bgColorInput = document.getElementById('bg-color-input');
+        const sizeInput = document.getElementById('size-input');
+        const sizeValueDisplay = document.getElementById('size-value');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const loading = document.getElementById('loading');
+        const downloadButton = document.getElementById('download');
+        const resetButton = document.getElementById('reset');
+
+        const defaultColor = '#000000';
+        const defaultBgColor = '#ffffff';
+        const defaultSize = 200;
+
+        colorInput.value = defaultColor;
+        bgColorInput.value = defaultBgColor;
+        sizeInput.value = defaultSize;
+        sizeValueDisplay.textContent = defaultSize;
+
+        textInput.addEventListener('input', handleInputChange);
+        colorInput.addEventListener('input', generateQRCode);
+        bgColorInput.addEventListener('input', generateQRCode);
+        sizeInput.addEventListener('input', () => {
+            sizeValueDisplay.textContent = sizeInput.value;
+            generateQRCode();
+        });
+
+        function handleInputChange() {
+            if (textInput.value.trim() === '') {
+                canvas.style.display = 'none';
+                downloadButton.disabled = true;
+                colorInput.disabled = true;
+                bgColorInput.disabled = true;
+                sizeInput.disabled = true;
+            } else {
+                colorInput.disabled = false;
+                bgColorInput.disabled = false;
+                sizeInput.disabled = false;
+                generateQRCode();
+            }
+        }
+
+        function generateQRCode() {
+            const text = textInput.value;
+            const color = colorInput.value;
+            const bgColor = bgColorInput.value;
+            const size = sizeInput.value;
+
+            loading.style.display = 'block';
+            canvas.style.display = 'none';
+
+            QRCode.toCanvas(canvas, text, {
+                width: size,
+                color: {
+                    dark: color,
+                    light: bgColor
+                }
+            }, function (error) {
+                if (error) {
+                    console.error(error);
+                    alert('生成二维码失败');
+                } else {
+                    loading.style.display = 'none';
+                    canvas.style.display = 'block';
+                    downloadButton.disabled = false;
+                }
+            });
+        }
+
+        downloadButton.addEventListener('click', () => {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            const fileName = `hongqian-QR-${year}${month}${day}${hours}${minutes}${seconds}.png`;
+            const link = document.createElement('a');
+            link.download = fileName;
+            link.href = canvas.toDataURL();
+            link.click();
+        });
+
+        resetButton.addEventListener('click', () => {
+            textInput.value = '';
+            colorInput.value = defaultColor;
+            bgColorInput.value = defaultBgColor;
+            sizeInput.value = defaultSize;
+            sizeValueDisplay.textContent = defaultSize;
+
+            canvas.style.display = 'none';
+            downloadButton.disabled = true;
+
+            colorInput.disabled = true;
+            bgColorInput.disabled = true;
+            sizeInput.disabled = true;
+        });
+    </script>
+</body>
+</html>
